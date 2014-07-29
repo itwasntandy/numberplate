@@ -63,15 +63,32 @@ for contour in contours:
 print "after ", len(rects)
 print len(newcontours)
 
+print morphed_img.shape
 
-cv2.drawContours(morphed_img,newcontours,-1,(128,255,255),3)
+for rect in rects:
+  box = cv2.cv.BoxPoints(rect)
+  x = rect[0][0]
+  y = rect[0][1]
+  width = float(rect[1][0])
+  height = float(rect[1][1])
+  centerx = int(x + width/2)
+  centery = int(y + height/2)
 
-cv2.imshow('contours', morphed_img)
+  result = cv2.circle(morphed_img,(centerx,centery), 3, (0,255,0), -1)
+  minSize = min(width/2, height/2)
+
+  mask = np.zeros((morphed_img.shape[0]+2, morphed_img.shape[1] +2))
+  print mask.shape
+
+
+#cv2.drawContours(morphed_img,newcontours,-1,(128,255,255),3)
+
+#cv2.imshow('contours', morphed_img)
 #plt.subplot(2,1,1)
 #plt.imshow(morphed_img2)
 #plt.subplot(2,1,2),
 #plt.imshow(morphed_img)
 #plt.show()
 #cv2.imshow('image',sobel_img)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+#ccv2.waitKey(0)
+#cv2.destroyAllWindows()
