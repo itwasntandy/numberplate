@@ -26,11 +26,45 @@ morphed_img2 = morphed_img.copy()
 contours, hierarchy = cv2.findContours(morphed_img,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
 #plt.imshow(cont_img, cmap = 'gray')
 
-#plt.matshow(cont_img)
-print contours
+def verifySizes(mr):
+  error = 0.4
+  aspect = 4.7272
+  minArea = 31*aspect*31
+  maxArea = 125*aspect*125
+  ratioMin = aspect-aspect*error
+  ratioMax = aspect+aspect*error
+
+  # example - gives cooridinates, size, angle..
+# ((1271.2064208984375, 1051.0308837890625), (23.04122543334961, 2.588901996612549), -21.250507354736328)
+  width = mr[1][0]
+  height = mr[1][1]
+  if any([height == 0, width == 0]):
+    return False
+
+  area = width * height
+  aspectRatio = float(width) / float(height)
+  if(aspectRatio<1):
+    aspectRatio = 1/aspectRatio
+  if any([area < minArea, area > maxArea, aspectRatio < ratioMin, aspectRatio > ratioMax]):
+    return False
+  return True
+
+print "before ", len(contours)
+
+rects = []
+newcontours = []
+
+for contour in contours:
+  mr = cv2.minAreaRect(contour)
+  if (verifySizes(mr)):
+    rects.append(mr)
+    newcontours.append(contour)
+
+print "after ", len(rects)
+print len(newcontours)
 
 
-cv2.drawContours(morphed_img,contours,-1,(128,255,255),3)
+cv2.drawContours(morphed_img,newcontours,-1,(128,255,255),3)
 
 cv2.imshow('contours', morphed_img)
 #plt.subplot(2,1,1)
