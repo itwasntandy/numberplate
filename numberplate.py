@@ -87,18 +87,24 @@ for rect in rects:
   lo,hi = 30,30
   connectivity = 4
   flags = connectivity
+  flags |= (255 << 8)
   flags |= cv2.FLOODFILL_FIXED_RANGE
+
+  #flags |= cv2.FLOODFILL_MASK_ONLY
   seeds = np.zeros((5,2),np.int16)
-  for i in (1,2):
+  for i in range(5):
     print random.randrange(int(centerx-minSize/2),int(centerx+minSize/2))
     seeds[i][0] = random.randrange(int(centerx-minSize/2),int(centerx+minSize/2))
     seeds[i][1] = random.randrange(int(centery-minSize/2),int(centery+minSize/2))
     #seeds[i]=[int(val) for val in seeds[i]]
     print seeds[i]
-    cv2.floodFill(img,mask,tuple(seeds[i]),(255,255,255),lo,hi,flags)
-    cv2.circle(img,tuple(seeds[i]),2, (0, 0, 255), -1)
 
-  cv2.imshow('circle', img)
+    cv2.floodFill(img,mask,tuple(seeds[0]),(255,255,255),lo,hi,flags)
+  #new_img = cv2.circle(img,tuple(seeds[0]),100, (255, 255, 255), 10)
+  new_img = cv2.circle(img,(centerx,centery),10, (0, 0,0 ), 10)
+  print seeds[0]
+
+  cv2.imshow('circle', new_img)
 
 
 #cv2.drawContours(morphed_img,newcontours,-1,(128,255,255),3)
