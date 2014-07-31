@@ -102,7 +102,10 @@ for rect in rects:
     cv2.floodFill(img,mask,tuple(seeds[0]),(255,255,255),lo,hi,flags)
   #new_img = cv2.circle(img,tuple(seeds[0]),100, (255, 255, 255), 10)
   new_img = cv2.circle(img,(centerx,centery),10, (0, 0,0 ), 10)
+  print "this is rects"
   print rects[0]
+  print "this is box"
+  print box
   print int(rects[0][0][0]+rects[0][1][0])
 # ((10135, 912.6630249023438), (235.74269104003906, 64.00566864013672), -1.3639276027679443)
 
