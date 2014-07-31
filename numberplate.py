@@ -72,8 +72,8 @@ for rect in rects:
   y = rect[0][1]
   width = float(rect[1][0])
   height = float(rect[1][1])
-  centerx = int(x + width/2)
-  centery = int(y + height/2)
+  centerx = int(x)
+  centery = int(y)
 
   result = cv2.circle(morphed_img,(centerx,centery), 3, (0,255,0), -1)
   minSize = min(width/2, height/2)
@@ -91,8 +91,8 @@ for rect in rects:
   flags |= cv2.FLOODFILL_FIXED_RANGE
 
   #flags |= cv2.FLOODFILL_MASK_ONLY
-  seeds = np.zeros((5,2),np.int16)
-  for i in range(5):
+  seeds = np.zeros((100,2),np.int16)
+  for i in range(100):
     print random.randrange(int(centerx-minSize/2),int(centerx+minSize/2))
     seeds[i][0] = random.randrange(int(centerx-minSize/2),int(centerx+minSize/2))
     seeds[i][1] = random.randrange(int(centery-minSize/2),int(centery+minSize/2))
@@ -100,8 +100,9 @@ for rect in rects:
     print seeds[i]
 
     cv2.floodFill(img,mask,tuple(seeds[0]),(255,255,255),lo,hi,flags)
+  img = cv2.rectangle(img,(int(centerx - width/2),int(centery - height/2)),(int(centerx + width/2),int(centery+ height/2)),(128,128,128))
   #new_img = cv2.circle(img,tuple(seeds[0]),100, (255, 255, 255), 10)
-  new_img = cv2.circle(img,(centerx,centery),10, (0, 0,0 ), 10)
+  #new_img = cv2.circle(img,(centerx,centery),10, (0, 0,0 ), 10)
   print "this is rects"
   print rects[0]
   print "this is box"
@@ -110,10 +111,9 @@ for rect in rects:
 # ((10135, 912.6630249023438), (235.74269104003906, 64.00566864013672), -1.3639276027679443)
 
 
-  new_img = cv2.rectangle(new_img,(int(rects[0][0][0]),int(rects[0][0][1])),(int(rects[0][0][0]+rects[0][1][0]),int(rects[0][0][1]+rects[0][1][1])),(128,128,128))
   print seeds[0]
 
-  cv2.imshow('circle', new_img)
+  cv2.imshow('circle', img)
 
 
 #cv2.drawContours(morphed_img,newcontours,-1,(128,255,255),3)
