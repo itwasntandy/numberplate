@@ -50,7 +50,7 @@ def verifySizes(mr):
     return False
   return True
 
-print "before ", len(contours)
+# print "before ", len(contours)
 
 rects = []
 newcontours = []
@@ -61,10 +61,10 @@ for contour in contours:
     rects.append(mr)
     newcontours.append(contour)
 
-print "after ", len(rects)
-print len(newcontours)
+# print "after ", len(rects)
+# print len(newcontours)
 
-print morphed_img.shape
+# print morphed_img.shape
 
 for rect in rects:
   box = cv2.boxPoints(rect)
@@ -80,10 +80,10 @@ for rect in rects:
 
   mask = np.zeros((morphed_img.shape[0]+2, morphed_img.shape[1] +2),np.uint8)
   mask[:] = 0
-  print mask.shape
-  print type(mask)
+  # print mask.shape
+  # print type(mask)
   #mask = cv2.drawContours(mask,newcontours[0],0,255,-1)
-  print centerx
+  # print centerx
   lo,hi = 30,30
   connectivity = 4
   flags = connectivity
@@ -93,25 +93,25 @@ for rect in rects:
   #flags |= cv2.FLOODFILL_MASK_ONLY
   seeds = np.zeros((100,2),np.int16)
   for i in range(100):
-    print random.randrange(int(centerx-minSize/2),int(centerx+minSize/2))
+    # print random.randrange(int(centerx-minSize/2),int(centerx+minSize/2))
     seeds[i][0] = random.randrange(int(centerx-minSize/2),int(centerx+minSize/2))
     seeds[i][1] = random.randrange(int(centery-minSize/2),int(centery+minSize/2))
     #seeds[i]=[int(val) for val in seeds[i]]
-    print seeds[i]
+    # print seeds[i]
 
     cv2.floodFill(img,mask,tuple(seeds[0]),(255,255,255),lo,hi,flags)
   img = cv2.rectangle(img,(int(centerx - width/2),int(centery - height/2)),(int(centerx + width/2),int(centery+ height/2)),(128,128,128))
   #new_img = cv2.circle(img,tuple(seeds[0]),100, (255, 255, 255), 10)
   #new_img = cv2.circle(img,(centerx,centery),10, (0, 0,0 ), 10)
-  print "this is rects"
-  print rects[0]
-  print "this is box"
-  print box
-  print int(rects[0][0][0]+rects[0][1][0])
+  # print "this is rects"
+  # print rects[0]
+  # print "this is box"
+  # print box
+  # print int(rects[0][0][0]+rects[0][1][0])
 # ((10135, 912.6630249023438), (235.74269104003906, 64.00566864013672), -1.3639276027679443)
 
 
-  print seeds[0]
+  # print seeds[0]
 
   cv2.imshow('circle', img)
 
