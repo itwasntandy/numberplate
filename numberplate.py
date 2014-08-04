@@ -5,7 +5,7 @@ from matplotlib import pyplot as plt
 import numpy as np
 import random
 
-filepath = "/Users/andy/work/headon/_M2B3091.jpg"
+filepath = "./_M2B3091.jpg"
 
 img = cv2.imread(filepath,0)
 blur_img = cv2.blur(img,(5,5))
