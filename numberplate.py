@@ -6,14 +6,21 @@ import numpy as np
 import random
 import copy
 
-filepath = "./_M2B3091.jpg"
-#filepath = "./_M2B3097.jpg"
-#filepath = "./_DNF0596.jpg"
-#filepath = "./_DNF0618.jpg"
+filepath = "./_M2B3091.jpg" #works well on this one
+filepath = "./_M2B3097.jpg"
+filepath = "./_DNF0596.jpg"
+#filepath = "./_DNF0618_cropped.jpg"
+#filepath = "./_DNF0618.jpg" #a hard one
+#filepath = "./_DNF0630.jpg"
+#filepath = "_N7B2040.jpg"
+#filepath = "_DNF0648.jpg"
+filepath = "_DNF0395.jpg"
+filepath= "_DNF0612.jpg"
+
 
 img = cv2.imread(filepath,0)
 #blur_img = cv2.blur(img,(10,10))
-blur_img = cv2.blur(img,(15,15))
+blur_img = cv2.blur(img,(5,5))
 
 #sobel_img = cv2.Sobel(blur_img,cv2.CV_64F,1,0,3,1,0)
 sobel_img = cv2.Sobel(blur_img,-1,1,0)
@@ -21,8 +28,13 @@ sobel_img = cv2.Sobel(blur_img,-1,1,0)
 ret,threshold_img = cv2.threshold(sobel_img,0,255,cv2.THRESH_OTSU)
 #ret,threshold_img = cv2.threshold(sobel_img,0,255,cv2.THRESH_TOZERO)
 
-element = cv2.getStructuringElement(cv2.MORPH_RECT,(44,6))
+element = cv2.getStructuringElement(cv2.MORPH_RECT,(17,2))
 morphed_img = cv2.morphologyEx(threshold_img,cv2.MORPH_CLOSE,element)
+
+kernel = np.ones((2,7),np.uint8)
+morphed_img = cv2.erode(morphed_img,kernel,iterations = 4)
+morphed_img = cv2.dilate(morphed_img,kernel,iterations = 9)
+
 
 plt.imshow(morphed_img,'gray')
 plt.show()
@@ -31,14 +43,15 @@ plt.show()
 #morphed_img2 = cv2.dilate(morphed_img,kernel)
 #morphed_img2 = cv2.morphologyEx(threshold_img,cv2.MORPH_CLOSE,kernel)
 morphed_img, contours, hierarchy = cv2.findContours(morphed_img,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
-
-plt.imshow(morphed_img,'gray')
-plt.show()
+#morphed_img, contours, hierarchy = cv2.findContours(morphed_img,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+#plt.imshow(morphed_img,'gray')
+#plt.show()
+  
 
 def verifySizes(mr):
   error = 0.4
   aspect = 4.7272
-  minArea = 31*aspect*31
+  minArea = 20*aspect*20
   maxArea = 125*aspect*125
   ratioMin = aspect-aspect*error
   ratioMax = aspect+aspect*error
@@ -64,8 +77,11 @@ rects = []
 newcontours = []
 
 for contour in contours:
+  
   mr = cv2.minAreaRect(contour)
-  if (verifySizes(mr)):
+  if (verifySizes(mr)):  
+  #if (verifySizes(mr)) and cv2.contourArea(contour)/len(contour)<100:
+    #print "contour area", cv2.contourArea(contour)
     rects.append(mr)
     newcontours.append(contour)
 
@@ -154,7 +170,7 @@ for numContour,rect in enumerate(rects):
         print "x,y:", x, y
         break
 
-  print "there are: ", len(pointsofinterest), " ponits of interest"
+  #print "there are: ", len(pointsofinterest), " ponits of interest"
   newMR = cv2.minAreaRect(np.array(pointsofinterest))
 
   x = newMR[0][0]
@@ -165,11 +181,12 @@ for numContour,rect in enumerate(rects):
   centery = int(y)
 
   newbox = np.int0(cv2.boxPoints(newMR))
-  print newbox
+  #print newbox
 
 
   #newimg = cv2.rectangle(img,(int(centerx - width/2),int(centery - height/2)),(int(centerx + width/2),int(centery+ height/2)),(128,128,128))
   newimg = cv2.drawContours(img,[newbox],0,(128,128,128), 5)
+
   #new_img = cv2.circle(img,tuple(seeds[0]),100, (255, 255, 255), 10)
   #new_img = cv2.circle(img,(centerx,centery),10, (0, 0,0 ), 10)
   # print "this is rects"
@@ -183,8 +200,11 @@ for numContour,rect in enumerate(rects):
   # print seeds[0]
 
   #cv2.imshow('circle', img)
+cv2.drawContours(img,contours,-1,(0,255,0),3)
+if(len(newimg)):
   cv2.imshow('circle', newimg)
-
+else:
+  cv2.imshow('circle',img)
 
 #plt.subplot(2,1,1)
 #plt.imshow(morphed_img2)
