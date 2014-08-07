@@ -6,15 +6,15 @@ import numpy as np
 import random
 import copy
 
-#filepath = "./_M2B3091.jpg" #works well on this one
+filepath = "./_M2B3091.jpg" #works well on this one
 #filepath = "./_M2B3097.jpg"
-filepath = "./_DNF0596.jpg"
+#filepath = "./_DNF0596.jpg"
 #filepath = "./_DNF0618_cropped.jpg"
 #filepath = "./_DNF0618.jpg" #a hard one
 #filepath = "./_DNF0630.jpg"
-#filepath = "_N7B2040.jpg"
+filepath = "_N7B2040.jpg"
 #filepath = "_DNF0648.jpg"
-#filepath = "_DNF0395.jpg"
+#filepath = "_DNF0395.jpg" - doesn't crop on numberplate
 #filepath= "_DNF0612.jpg"
 
 
@@ -156,24 +156,49 @@ for numContour,rect in enumerate(rects):
 
 
 
+#
+#  # find the enclosing non rotated rectangle
+#  def enclosingRect(box):
+#    xMin = min([box[i][0] for i in range(3)])
+#    xMax = max([box[i][0] for i in range(3)])
+#    yMin = min([box[i][1] for i in range(3)])
+#    yMax = max([box[i][1] for i in range(3)])
+#    return (xMin,xMax,yMin,yMax)
+#
+#
+#  #
+#  #
+#
+#  xMin,xMax,yMin,yMax = enclosingRect(newbox)
+#
+#  center = ((xMin+xMax)/2,(yMin+yMax/2))
+#
+  center = tuple(np.int0(newMR[0]))
+  angle = newMR[-1]
+  width = newMR[1][0]
+  height = newMR[1][1]
 
-  # find the enclosing non rotated rectangle
-  def enclosingRect(box):
-    xMin = min([box[i][0] for i in range(3)])
-    xMax = max([box[i][0] for i in range(3)])
-    yMin = min([box[i][1] for i in range(3)])
-    yMax = max([box[i][1] for i in range(3)])
-    return (xMin,xMax,yMin,yMax)
+  newAspectRatio = width/height
 
+  if (newAspectRatio < 1):
+    angle = angle+90
+    width,height = height,width
+  rotationMatrix = cv2.getRotationMatrix2D(center,angle,1)
 
-  #
-  #
-  xMin,xMax,yMin,yMax = enclosingRect(newbox)
+  rotatedImg = cv2.warpAffine(img,rotationMatrix,(img.shape[1],img.shape[0]))
+  croppedImg = cv2.getRectSubPix(rotatedImg, (int(width),int(height)), center)
 
-  center = ((xMin+xMax)/2,(yMin+yMax/2))
+  resultResized = np.array([]).astype(cv2.CV_8UC3)
+  resultResized =  cv2.resize(croppedImg,(144,33))
+  print resultResized.shape
 
-  rotationMatrix = cv2.getRotationMatrix2D(center,newMR[-1],1)
+  grayResult = cv2.cvtColor(resultResized, cv2.COLOR_BGR2GRAY)
 
+#  plt.imshow(croppedImg)
+  #plt.imshow(rotatedImg)
+#  plt.show()
+  plt.imshow(grayResult)
+  plt.show()
 
 
   #
