@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+import sys
+sys.path.append('/usr/local/opencv2/lib/python2.7/site-packages')
 import cv2
 from matplotlib import pyplot as plt
 import numpy as np
@@ -38,7 +40,7 @@ def findPlate(filepath="./_M2B3097.jpg"):
   morphed_img = cv2.morphologyEx(threshold_img,cv2.MORPH_CLOSE,element)
 
   kernel = np.ones((2,7),np.uint8)
-  morphed_img = cv2.erode(morphed_img,kernel,iterations = 4)
+  morphed_img = cv2.erode(morphed_img,kernel,iterations = 6)
   morphed_img = cv2.dilate(morphed_img,kernel,iterations = 9)
 
 
@@ -271,14 +273,14 @@ def findPlate(filepath="./_M2B3097.jpg"):
   #cv2.destroyAllWindows()
 
   try:
-    inputFile = open("data.list","r+b")
+    inputFile = open("data.list2","r+b")
     inputList = pickle.load(inputFile)
     inputList = [i for i in inputList[0]]
     inputFile.close()
-    outputFile = open("data.list", "wb")
+    outputFile = open("data.list2", "wb")
 
   except:
-    outputFile = open("data.list","wb")
+    outputFile = open("data.list2","wb")
     inputList = []
 
 
@@ -296,5 +298,3 @@ def compileData():
       if f[-3:] == "jpg":
         print f
         findPlate(folderPath + "/" + f)
-
-compileData()
