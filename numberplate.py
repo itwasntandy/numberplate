@@ -9,19 +9,20 @@ import random
 import copy
 import pickle
 import os
+import platereader
 
 
 def findPlate(filepath="./_M2B3097.jpg"):
 
-  #filepath = "./_M2B3091.jpg" #works well on this one
+  filepath = "./_M2B3091.jpg" #works well on this one
   #filepath = "./_M2B3097.jpg"
   #filepath = "./_DNF0596.jpg"
   #filepath = "./_DNF0618_cropped.jpg"
   #filepath = "./_DNF0618.jpg" #a hard one
-  #filepath = "./_DNF0630.jpg"
+  #filepath = "./_DNF0630.jpg" # floodfill messes this one up
   #filepath = "_N7B2040.jpg"
   #filepath = "_DNF0648.jpg"
-  #filepath = "_DNF0395.jpg" - doesn't crop on numberplate
+  #filepath = "_DNF0395.jpg" #- doesn't crop on numberplate
   #filepath= "_DNF0612.jpg"
 
 
@@ -32,7 +33,8 @@ def findPlate(filepath="./_M2B3097.jpg"):
 
   #sobel_img = cv2.Sobel(blur_img,cv2.CV_64F,1,0,3,1,0)
   sobel_img = cv2.Sobel(blur_img,-1,1,0)
-
+  plt.imshow(sobel_img, 'gray')
+  plt.show()
   ret,threshold_img = cv2.threshold(sobel_img,0,255,cv2.THRESH_OTSU)
   #ret,threshold_img = cv2.threshold(sobel_img,0,255,cv2.THRESH_TOZERO)
 
@@ -42,18 +44,16 @@ def findPlate(filepath="./_M2B3097.jpg"):
   kernel = np.ones((2,7),np.uint8)
   morphed_img = cv2.erode(morphed_img,kernel,iterations = 6)
   morphed_img = cv2.dilate(morphed_img,kernel,iterations = 9)
+  plt.imshow(morphed_img, 'gray')
+  plt.show()
 
 
-  #plt.imshow(morphed_img,'gray')
-  #plt.show()
+
   #kernel = np.ones((8,8),np.uint8)
-  #morphed_img2 = morphed_img.copy()
-  #morphed_img2 = cv2.dilate(morphed_img,kernel)
-  #morphed_img2 = cv2.morphologyEx(threshold_img,cv2.MORPH_CLOSE,kernel)
   morphed_img, contours, hierarchy = cv2.findContours(morphed_img,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
-  #morphed_img, contours, hierarchy = cv2.findContours(morphed_img,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
-  #plt.imshow(morphed_img,'gray')
-  #plt.show()
+  new_img = cv2.drawContours(threshold_img, contours,-1,128,-1)
+  plt.imshow(new_img,'gray')
+  plt.show()
 
 
   def verifySizes(mr):
@@ -94,7 +94,10 @@ def findPlate(filepath="./_M2B3097.jpg"):
       newcontours.append(contour)
 
   # print "after ", len(rects)
-  # print len(newcontours)
+  #print len(newcontours)
+  new_img = cv2.drawContours(threshold_img, newcontours,-1,128,-1)
+  plt.imshow(new_img,'gray')
+  plt.show()
 
   # print morphed_img.shape
   plateList =  []
@@ -155,8 +158,9 @@ def findPlate(filepath="./_M2B3097.jpg"):
     newMR = cv2.minAreaRect(floodPoints)
 
     newBox = np.int0(cv2.boxPoints(newMR))
-    #plt.imshow(mask,'gray')
-    #plt.show()
+
+    plt.imshow(mask,'gray')
+    plt.show()
     if (not verifySizes(newMR)):
        continue
     else:
@@ -197,104 +201,43 @@ def findPlate(filepath="./_M2B3097.jpg"):
     croppedImg = cv2.getRectSubPix(rotatedImg, (int(width),int(height)), center)
 
     resultResized =  cv2.resize(croppedImg,(144,33))
-    blurResult = cv2.blur(resultResized,(3,3))
+    blurResult = cv2.blur(resultResized,(1,1))
     equalResult = cv2.equalizeHist(blurResult)
     plateList.append(equalResult)
 
+    #print len(plateList)
+    for plateCandidate in plateList:
+      plt.imshow(plateCandidate,'gray')
+      plt.show()
+      print platereader.readPlate(plateCandidate)
+#  try:
+#    inputFile = open("data.list2","r+b")
+#    inputList = pickle.load(inputFile)
+#    inputList = [i for i in inputList[0]]
+#    inputFile.close()
+#    outputFile = open("data.list2", "wb")
+#
+#  except:
+#    outputFile = open("data.list2","wb")
+#    inputList = []
+#
+#
+#  print "before", len(inputList)
+#  for plate in plateList:
+#    inputList.append(plate)
+#  print len(inputList)
+#  pickle.dump([inputList],outputFile)
+#  outputFile.close()
+#
 
-
-
-  #  plt.imshow(croppedImg)
-    #plt.imshow(rotatedImg)
-  #  plt.show()
-  #  plt.imshow(resultResized)
-  #  plt.show()
-
-
-    #
-    #  # calculate a new rectangle for just the flood filled points
-    #  pointsofinterest = []
-    #  for x in range(xMin, xMax):
-    #    for y in range(yMin, yMax):
-    #      # we flip x y here because .shape returns y first.. confusing eh?
-    #      try:
-    #        if maskedimg[y][x] == 255:
-    #          pointsofinterest.append([x,y])
-    #      except:
-    #        print "box is :", box
-    #        print "shape is:", maskedimg.shape
-    #        print "x,y:", x, y
-    #        break
-    #
-    #  #print "there are: ", len(pointsofinterest), " ponits of interest"
-    #  newMR = cv2.minAreaRect(np.array(pointsofinterest))
-    #
-    #  x = newMR[0][0]
-    #  y = newMR[0][1]
-    #  width = float(newMR[1][0])
-    #  height = float(newMR[1][1])
-    #  centerx = int(x)
-    #  centery = int(y)
-    #
-    #  newBox = np.int0(cv2.boxPoints(newMR))
-    #  #print newBox
-    #
-
-    #newimg = cv2.rectangle(img,(int(centerx - width/2),int(centery - height/2)),(int(centerx + width/2),int(centery+ height/2)),(128,128,128))
-    #newimg = cv2.drawContours(img,[newBox],0,(128,128,128), 5)
-
-
-    #new_img = cv2.circle(img,tuple(seeds[0]),100, (255, 255, 255), 10)
-    #new_img = cv2.circle(img,(centerx,centery),10, (0, 0,0 ), 10)
-    # print "this is rects"
-    # print rects[0]
-    # print "this is box"
-    # print box
-    # print int(rects[0][0][0]+rects[0][1][0])
-  # ((10135, 912.6630249023438), (235.74269104003906, 64.00566864013672), -1.3639276027679443)
-
-
-    # print seeds[0]
-
-    #cv2.imshow('circle', img)
-  #cv2.drawContours(img,contours,-1,(0,255,0),3)
-  #if(len(newimg)):
-  #  cv2.imshow('circle', newimg)
-  #else:
-  #  cv2.imshow('circle',img)
-
-  #plt.subplot(2,1,1)
-  #plt.imshow(morphed_img2)
-  #plt.subplot(2,1,2),
-  #plt.imshow(morphed_img)
-  #plt.show()
-  #cv2.imshow('image',sobel_img)
-  #cv2.waitKey(0)
-  #cv2.destroyAllWindows()
-
-  try:
-    inputFile = open("data.list2","r+b")
-    inputList = pickle.load(inputFile)
-    inputList = [i for i in inputList[0]]
-    inputFile.close()
-    outputFile = open("data.list2", "wb")
-
-  except:
-    outputFile = open("data.list2","wb")
-    inputList = []
-
-
-  print "before", len(inputList)
-  for plate in plateList:
-    inputList.append(plate)
-  print len(inputList)
-  pickle.dump([inputList],outputFile)
-  outputFile.close()
+findPlate()
 
 def compileData():
-  folderPath = "/Users/andy/work/pos3"
+  folderPath = "/Users/andy/work/nplates"
   for root, dirs, filenames in os.walk(folderPath):
     for f in filenames:
       if f[-3:] == "jpg":
         print f
         findPlate(folderPath + "/" + f)
+
+#compileData()

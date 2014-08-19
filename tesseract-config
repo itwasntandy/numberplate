@@ -1,0 +1,12 @@
+#image_default_resolution 150
+#doc_dict_enable 0
+#language_model_penalty_non_dict_word 0
+tessedit_pageseg_mode 10
+tessedit_char_whitelist 0123456789ABCDEFGHJKLMNOPQRSTUVWXYZ
+#enable_new_segsearch 1
+#language_model_ngram_on 1
+#chop_enable false
+#language_model_penalty_non_freq_dict_word 0
+#classify_enable_adaptive_debugger       0
+#matcher_debug_flags         0
+#matcher_debug_level       0
