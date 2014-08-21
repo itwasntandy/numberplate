@@ -12,22 +12,22 @@ import os
 import platereader
 
 
-def findPlate(filepath="./_M2B3097.jpg"):
+def findPlate(filepath="./images/_M2B3097.jpg"):
 
-  #filepath = "./_M2B3091.jpg" #works well on this one
-  #filepath = "./_M2B3097.jpg"
-  #filepath = "./_M2B3102.jpg"
-  #filepath = "./_M2B3099.jpg"
-  #filepath = "./_DNF0596.jpg"
-  #filepath = "./_DNF0618_cropped.jpg"
-  #filepath = "./_DNF0618.jpg" #a hard one gets H53YAT, should be H643 YAT
-  #filepath = "./_DNF0630.jpg" # floodfill messes this one up
-  #filepath = "./_DNF0634.jpg" # gets YG2UTJ should be YG12 UTJ.
-  #filepath = "_N7B2040.jpg"
-  #filepath = "_DNF0648.jpg" # finds AEUU5 YUS - should be AE05 YUS
-  #filepath = "_DNF0395.jpg" #- doesn't crop on numberplate
-  #filepath= "_DNF0612.jpg"
-  #filepath= "_DNF0663.jpg"
+  #filepath = "./images/_M2B3091.jpg" #works well on this one
+  #filepath = "./images/_M2B3097.jpg"
+  #filepath = "./images/_M2B3102.jpg"
+  #filepath = "./images/_M2B3099.jpg"
+  #filepath = "./images/_DNF0596.jpg"
+  #filepath = "./images/_DNF0618_cropped.jpg"
+  #filepath = "./images/_DNF0618.jpg" #a hard one gets H53YAT, should be H643 YAT
+  #filepath = "./images/_DNF0630.jpg" # floodfill messes this one up
+  #filepath = "./images/_DNF0634.jpg" # gets YG2UTJ should be YG12 UTJ.
+  #filepath = "./images/_N7B2040.jpg"
+  #filepath = "./images/_DNF0648.jpg" # finds AEUU5 YUS - should be AE05 YUS
+  #filepath = "./images/_DNF0395.jpg" #- doesn't crop on numberplate
+  #filepath= "./images/_DNF0612.jpg"
+  #filepath= "./images/_DNF0663.jpg"
 
 
   img = cv2.imread(filepath,0)
@@ -211,17 +211,19 @@ def findPlate(filepath="./_M2B3097.jpg"):
     plateList.append(equalResult)
 
   numberlist = []
+  numbnospaces = []
   for plateCandidate in plateList:
-    plt.imshow(plateCandidate,'gray')
-    plt.show()
+    #plt.imshow(plateCandidate,'gray')
+    #plt.show()
     answer = platereader.readPlate(plateCandidate)
     if answer:
         numberlist.append(answer)
+        nospace = answer.replace(" ", "")
+        numbnospaces.append(nospace)
 
   if len(numberlist) == 0:
       return
-
-  longest = np.argmax([len(num) for num in numberlist])
+  longest = np.argmax([len(num) for num in numbnospaces])
   print numberlist[longest]
 #  try:
 #    inputFile = open("data.list2","r+b")
@@ -242,25 +244,26 @@ def findPlate(filepath="./_M2B3097.jpg"):
 #  pickle.dump([inputList],outputFile)
 #  outputFile.close()
 #
-def compileData():
-  folderPath = "/Users/andy/work/nplates"
-  for root, dirs, filenames in os.walk(folderPath):
-    for f in filenames:
-      if f[-3:] == "jpg":
-        print f
-        findPlate(folderPath + "/" + f)
+#def compileData():
+#  folderPath = "/Users/andy/work/nplates"
+#  for root, dirs, filenames in os.walk(folderPath):
+#    for f in filenames:
+#      if f[-3:] == "jpg":
+#        print f
+#        findPlate(folderPath + "/" + f)
 
 #compileData()
-if len(sys.argv) > 1:
+
+#if len(sys.argv) > 1:
     #typically it will be run with python numberplate.py filename.jpg
     #arg argv[1] (2nd arg) is actually the numberplate
-    findPlate(sys.argv[1])
-elif len(sys.argv) == 1 and sys.argv[0] != "numberplate.py":
+#    findPlate(sys.argv[1])
+#elif len(sys.argv) == 1 and sys.argv[0] != "numberplate.py":
     #deal with the case where numberplate.py is executable,
     #and there is still an argument passed
-    findPlate(sys.argv[0])
-else:
-    findPlate()
+#    findPlate(sys.argv[0])
+#else:
+#    findPlate()
 
 
 
