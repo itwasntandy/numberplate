@@ -34,7 +34,7 @@ def deskew(img):
     img = cv2.warpAffine(img,M,img.shape,flags=affine_flags)
     return img
 
-def readLetter(contour,img):
+def readLetter(contour,img,refine=False):
   x,y,w,h = cv2.boundingRect(contour)
   if h == 0:
     return False
@@ -49,17 +49,31 @@ def readLetter(contour,img):
 
   numWhite = len(np.transpose(np.nonzero(croppedImg)))
   percentPixels = float(numWhite)/(w*h)
-  #plt.matshow(croppedImg, cmap = cm.Greys_r)
-  #plt.show()
-  if percentPixels > 0.2 and charAspect > minAspect and charAspect < maxAspect and h < maxHeight and h > minHeight:
-      vertImg= cv2.copyMakeBorder(croppedImg,2,2,10,10,cv2.BORDER_CONSTANT,(0,0,0))
+  #if percentPixels > 0.2 and charAspect > minAspect and charAspect < maxAspect and h < maxHeight and h > minHeight:
+  if h < maxHeight and h > minHeight:
+      vertImg= cv2.copyMakeBorder(croppedImg,5,5,15,15,cv2.BORDER_CONSTANT,(0,0,0))
       ret,vertImg = cv2.threshold(vertImg,2,255,cv2.THRESH_BINARY_INV)
+      kernel = np.ones((1,1),np.uint8)
+      vertImg = cv2.erode(vertImg,kernel,iterations =2)
+      if refine:
+        kernel = np.ones((2,2),np.uint8)
+        vertImg = cv2.erode(vertImg,kernel,iterations = 3)
+        #vertImg = cv2.dilate(vertImg,kernel,iterations = 2)
+
       j = Image.fromarray(vertImg)
+      plt.matshow(vertImg, cmap = cm.Greys_r)
+      plt.show()
 
       letter =  pytesseract.image_to_string(j,config='./tesseract-config')
+      print "letter is ", letter
       if len(letter) >0:
+          print letter
           return letter
-      return False
+#      else if len(letter) == 0 and refine== True:
+#        #still false
+#        return False
+#      else
+      return "Tesserfail"
   return False
 
 
@@ -81,21 +95,33 @@ def readPlate(img):
     if len(contour) < 5:
         continue
     letter = readLetter(contour,threshold_img)
-    if not letter == False:
+    if letter == "Tesserfail":
+        print "we go again"
+        letter = readLetter(contour,threshold_img,True)
+        if not letter == False:
+            letters.append((letter,x))
+    elif letter == "I" or letter == "i":
+        letter = "1"
+        letters.append((letter,x))
+    elif letter == "U":
+        letter = readLetter(contour,threshold_img,True)
+        if not letter == False:
+            letters.append((letter,x))
+    elif not letter == False:
         letters.append((letter,x))
 
   letters = sorted(letters, key=lambda y: y[1])
   numberplate = [letters[i][0] for i in range(len(letters))]
   numberplate = ''.join(numberplate)
-  #cv2.drawContours(threshold_img,contours,-1,(128,128,128),1)
-  #plt.imshow(origimg,'gray')
-  #plt.matshow(threshold_img, cmap = cm.Greys_r)
-  #plt.show()
+  cv2.drawContours(threshold_img,contours,-1,(128,128,128),1)
+  ## plt.imshow(origimg,'gray')
+  plt.matshow(threshold_img, cmap = cm.Greys_r)
+  plt.show()
 
   if len(numberplate) >3 and len(numberplate) < 10:
       return numberplate
   else:
-      return False
+      return
 
 def openImage(fileName="data.list.iterations4"):
 

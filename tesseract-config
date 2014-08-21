@@ -2,7 +2,7 @@
 #doc_dict_enable 0
 #language_model_penalty_non_dict_word 0
 tessedit_pageseg_mode 10
-tessedit_char_whitelist 0123456789ABCDEFGHJKLMNOPQRSTUVWXYZ
+tessedit_char_whitelist 0123456789ABCDEFGHIJKlLMNOPQRSTUVWXYZ
 #enable_new_segsearch 1
 #language_model_ngram_on 1
 #chop_enable false

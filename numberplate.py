@@ -14,16 +14,20 @@ import platereader
 
 def findPlate(filepath="./_M2B3097.jpg"):
 
-  filepath = "./_M2B3091.jpg" #works well on this one
+  #filepath = "./_M2B3091.jpg" #works well on this one
   #filepath = "./_M2B3097.jpg"
+  #filepath = "./_M2B3102.jpg"
+  #filepath = "./_M2B3099.jpg"
   #filepath = "./_DNF0596.jpg"
   #filepath = "./_DNF0618_cropped.jpg"
-  #filepath = "./_DNF0618.jpg" #a hard one
+  #filepath = "./_DNF0618.jpg" #a hard one gets H53YAT, should be H643 YAT
   #filepath = "./_DNF0630.jpg" # floodfill messes this one up
+  #filepath = "./_DNF0634.jpg" # gets YG2UTJ should be YG12 UTJ.
   #filepath = "_N7B2040.jpg"
-  #filepath = "_DNF0648.jpg"
+  #filepath = "_DNF0648.jpg" # finds AEUU5 YUS - should be AE05 YUS
   #filepath = "_DNF0395.jpg" #- doesn't crop on numberplate
   #filepath= "_DNF0612.jpg"
+  #filepath= "_DNF0663.jpg"
 
 
   img = cv2.imread(filepath,0)
@@ -33,27 +37,27 @@ def findPlate(filepath="./_M2B3097.jpg"):
 
   #sobel_img = cv2.Sobel(blur_img,cv2.CV_64F,1,0,3,1,0)
   sobel_img = cv2.Sobel(blur_img,-1,1,0)
-  plt.imshow(sobel_img, 'gray')
-  plt.show()
+  #plt.imshow(sobel_img, 'gray')
+  #plt.show()
   ret,threshold_img = cv2.threshold(sobel_img,0,255,cv2.THRESH_OTSU)
   #ret,threshold_img = cv2.threshold(sobel_img,0,255,cv2.THRESH_TOZERO)
 
-  element = cv2.getStructuringElement(cv2.MORPH_RECT,(17,2))
+  element = cv2.getStructuringElement(cv2.MORPH_RECT,(28,5))
   morphed_img = cv2.morphologyEx(threshold_img,cv2.MORPH_CLOSE,element)
 
   kernel = np.ones((2,7),np.uint8)
   morphed_img = cv2.erode(morphed_img,kernel,iterations = 6)
   morphed_img = cv2.dilate(morphed_img,kernel,iterations = 9)
-  plt.imshow(morphed_img, 'gray')
-  plt.show()
+  #plt.imshow(morphed_img, 'gray')
+  #plt.show()
 
 
 
   #kernel = np.ones((8,8),np.uint8)
   morphed_img, contours, hierarchy = cv2.findContours(morphed_img,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
-  new_img = cv2.drawContours(threshold_img, contours,-1,128,-1)
-  plt.imshow(new_img,'gray')
-  plt.show()
+  #new_img = cv2.drawContours(threshold_img, contours,-1,128,-1)
+  #plt.imshow(new_img,'gray')
+  #plt.show()
 
 
   def verifySizes(mr):
@@ -87,7 +91,8 @@ def findPlate(filepath="./_M2B3097.jpg"):
   for contour in contours:
 
     mr = cv2.minAreaRect(contour)
-    if (verifySizes(mr)):
+    #if (verifySizes(mr)):
+    if True:
     #if (verifySizes(mr)) and cv2.contourArea(contour)/len(contour)<100:
       #print "contour area", cv2.contourArea(contour)
       rects.append(mr)
@@ -96,8 +101,8 @@ def findPlate(filepath="./_M2B3097.jpg"):
   # print "after ", len(rects)
   #print len(newcontours)
   new_img = cv2.drawContours(threshold_img, newcontours,-1,128,-1)
-  plt.imshow(new_img,'gray')
-  plt.show()
+  #plt.imshow(new_img,'gray')
+  #plt.show()
 
   # print morphed_img.shape
   plateList =  []
@@ -159,8 +164,8 @@ def findPlate(filepath="./_M2B3097.jpg"):
 
     newBox = np.int0(cv2.boxPoints(newMR))
 
-    plt.imshow(mask,'gray')
-    plt.show()
+    #plt.imshow(mask,'gray')
+    #plt.show()
     if (not verifySizes(newMR)):
        continue
     else:
@@ -205,11 +210,19 @@ def findPlate(filepath="./_M2B3097.jpg"):
     equalResult = cv2.equalizeHist(blurResult)
     plateList.append(equalResult)
 
-    #print len(plateList)
-    for plateCandidate in plateList:
-      plt.imshow(plateCandidate,'gray')
-      plt.show()
-      print platereader.readPlate(plateCandidate)
+  numberlist = []
+  for plateCandidate in plateList:
+    plt.imshow(plateCandidate,'gray')
+    plt.show()
+    answer = platereader.readPlate(plateCandidate)
+    if answer:
+        numberlist.append(answer)
+
+  if len(numberlist) == 0:
+      return
+
+  longest = np.argmax([len(num) for num in numberlist])
+  print numberlist[longest]
 #  try:
 #    inputFile = open("data.list2","r+b")
 #    inputList = pickle.load(inputFile)
@@ -229,9 +242,6 @@ def findPlate(filepath="./_M2B3097.jpg"):
 #  pickle.dump([inputList],outputFile)
 #  outputFile.close()
 #
-
-findPlate()
-
 def compileData():
   folderPath = "/Users/andy/work/nplates"
   for root, dirs, filenames in os.walk(folderPath):
@@ -241,3 +251,16 @@ def compileData():
         findPlate(folderPath + "/" + f)
 
 #compileData()
+if len(sys.argv) > 1:
+    #typically it will be run with python numberplate.py filename.jpg
+    #arg argv[1] (2nd arg) is actually the numberplate
+    findPlate(sys.argv[1])
+elif len(sys.argv) == 1 and sys.argv[0] != "numberplate.py":
+    #deal with the case where numberplate.py is executable,
+    #and there is still an argument passed
+    findPlate(sys.argv[0])
+else:
+    findPlate()
+
+
+
